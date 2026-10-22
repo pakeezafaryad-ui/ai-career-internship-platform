@@ -1,0 +1,135 @@
+
+[
+  {
+    "id": "SAMPLE001",
+    "title": "Python Developer Intern",
+    "company": "DemoTech Solutions",
+    "description": "Practice Python programming, debugging, and backend development on guided projects.",
+    "skills": [
+      "Python",
+      "Git and GitHub",
+      "SQL",
+      "REST APIs"
+    ],
+    "location": "Lahore, Pakistan",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE002",
+    "title": "AI Engineer Intern",
+    "company": "FutureAI Demo Lab",
+    "description": "Explore introductory AI applications, data preparation, and machine learning workflows.",
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "Data Analysis",
+      "APIs"
+    ],
+    "location": "Remote - Demo Listing",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE003",
+    "title": "Frontend Developer Intern",
+    "company": "WebCraft Demo Studio",
+    "description": "Practice building responsive interfaces and interactive website components.",
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Git and GitHub"
+    ],
+    "location": "Lahore, Pakistan",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE004",
+    "title": "Java Developer Intern",
+    "company": "CodeBridge Demo",
+    "description": "Work through practice tasks involving Java, object-oriented programming, and databases.",
+    "skills": [
+      "Java",
+      "Object-Oriented Programming",
+      "SQL",
+      "Testing"
+    ],
+    "location": "Hybrid - Demo Listing",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE005",
+    "title": "Data Analyst Intern",
+    "company": "InsightWorks Demo",
+    "description": "Practice data cleaning, spreadsheet analysis, and basic data visualization.",
+    "skills": [
+      "Excel",
+      "SQL",
+      "Python",
+      "Statistics",
+      "Pandas"
+    ],
+    "location": "Remote - Demo Listing",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE006",
+    "title": "Cybersecurity Intern",
+    "company": "SecurePath Demo Lab",
+    "description": "Learn security fundamentals, networking, and defensive security practices in a learning environment.",
+    "skills": [
+      "Networking",
+      "Linux",
+      "Python",
+      "Security Fundamentals"
+    ],
+    "location": "Lahore, Pakistan",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE007",
+    "title": "Machine Learning Intern",
+    "company": "ML Learning Studio",
+    "description": "Practice preparing datasets, training introductory models, and evaluating results.",
+    "skills": [
+      "Python",
+      "Statistics",
+      "Machine Learning",
+      "Data Processing",
+      "Model Evaluation"
+    ],
+    "location": "Remote - Demo Listing",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  },
+  {
+    "id": "SAMPLE008",
+    "title": "Full Stack Developer Intern",
+    "company": "AppWorks Demo Studio",
+    "description": "Explore frontend and backend development through a guided web application project.",
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Python",
+      "SQL",
+      "REST APIs"
+    ],
+    "location": "Lahore, Pakistan",
+    "type": "Internship",
+    "source_type": "sample",
+    "application_url": ""
+  }
+]
