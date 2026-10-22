@@ -1,24 +1,41 @@
-# Secrets and environment files
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
 .streamlit/secrets.toml
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-env/
+# IDE and editor files
+.idea/
+.vscode/
 
-# Local databases and private uploads
-*.db
-*.sqlite
-*.sqlite3
-data/*
-!data/.gitkeep
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local user uploads
 uploads/
-private_uploads/
-
-# Notebooks
-.ipynb_checkpoints/
