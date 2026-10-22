@@ -1,220 +1,138 @@
+"""Career recommendations based on interests, skills, and goals."""
+
+CAREERS = {
+    "AI Engineer": {
+        "keywords": ["ai", "artificial intelligence", "machine learning", "automation"],
+        "skills": ["Python", "Machine Learning", "Statistics", "Data Analysis"],
+        "description": "Build intelligent applications, AI assistants, and machine-learning systems.",
+        "next_step": "Learn Python, NumPy, pandas, and machine-learning fundamentals.",
+    },
+    "Python Developer": {
+        "keywords": ["python", "programming", "software", "backend", "development"],
+        "skills": ["Python", "OOP", "Git and GitHub", "APIs"],
+        "description": "Build software, automation tools, APIs, and backend applications.",
+        "next_step": "Build a Python project and learn APIs, testing, and databases.",
+    },
+    "Web Developer": {
+        "keywords": ["web", "website", "frontend", "backend", "html", "css"],
+        "skills": ["HTML", "CSS", "JavaScript", "Git and GitHub"],
+        "description": "Create websites and interactive web applications.",
+        "next_step": "Build a responsive website using HTML, CSS, and JavaScript.",
+    },
+    "Data Analyst": {
+        "keywords": ["data", "analytics", "statistics", "visualization"],
+        "skills": ["Python", "SQL", "Excel", "Data Visualization"],
+        "description": "Turn data into useful insights, reports, and dashboards.",
+        "next_step": "Practice SQL, spreadsheets, pandas, and data visualization.",
+    },
+    "Cybersecurity Analyst": {
+        "keywords": ["cybersecurity", "security", "network", "ethical hacking"],
+        "skills": ["Networking", "Linux", "Security Fundamentals", "Python"],
+        "description": "Help organizations protect systems, networks, and information.",
+        "next_step": "Study networking, Linux, and defensive security fundamentals.",
+    },
+    "Java Developer": {
+        "keywords": ["java", "object oriented", "oop", "software development"],
+        "skills": ["Java", "OOP", "SQL", "Git and GitHub"],
+        "description": "Develop applications and software systems using Java.",
+        "next_step": "Practice OOP, collections, SQL, and a complete Java project.",
+    },
+    "UI/UX Designer": {
+        "keywords": ["design", "graphic design", "ui", "ux", "creative"],
+        "skills": ["UI Design", "UX Research", "Prototyping", "Figma"],
+        "description": "Design clear, attractive, and easy-to-use digital products.",
+        "next_step": "Learn Figma and create a prototype for a simple application.",
+    },
+}
+
+
+def _normalise_items(value):
+    if isinstance(value, list):
+        items = value
+    else:
+        items = str(value or "").replace(";", ",").split(",")
+
+    return [str(item).strip().lower() for item in items if str(item).strip()]
+
+
 def recommend_careers(interests, skills, career_goal=""):
-    """
-    Recommend career paths based on a user's interests,
-    existing skills, and career goals.
-    """
+    interest_items = _normalise_items(interests)
+    skill_items = _normalise_items(skills)
+    goal = str(career_goal or "").strip().lower()
 
-    career_profiles = {
-        "AI Engineer": {
-            "interests": [
-                "artificial intelligence", "ai", "machine learning",
-                "automation", "research", "data"
-            ],
-            "skills": [
-                "python", "machine learning", "statistics",
-                "data analysis", "numpy", "pandas", "apis"
-            ],
-            "description": (
-                "Build AI-powered applications and machine learning solutions."
-            ),
-            "learning_focus": [
-                "Python", "Machine Learning", "Data Analysis", "AI APIs"
-            ],
-        },
-        "Python Developer": {
-            "interests": [
-                "programming", "software development",
-                "automation", "backend", "coding"
-            ],
-            "skills": [
-                "python", "programming", "git and github", "sql", "rest apis"
-            ],
-            "description": (
-                "Develop applications, automation scripts, and backend services."
-            ),
-            "learning_focus": [
-                "Python Fundamentals", "Object-Oriented Programming",
-                "APIs", "Databases"
-            ],
-        },
-        "Data Analyst": {
-            "interests": [
-                "data", "statistics", "business",
-                "research", "visualization", "reports"
-            ],
-            "skills": [
-                "excel", "sql", "python", "statistics",
-                "pandas", "data visualization"
-            ],
-            "description": (
-                "Analyze data and prepare reports to support decisions."
-            ),
-            "learning_focus": [
-                "Excel", "SQL", "Statistics", "Data Visualization"
-            ],
-        },
-        "Web Developer": {
-            "interests": [
-                "websites", "web development", "frontend",
-                "design", "backend", "coding"
-            ],
-            "skills": [
-                "html", "css", "javascript", "python", "sql", "rest apis"
-            ],
-            "description": (
-                "Create and maintain websites and web applications."
-            ),
-            "learning_focus": [
-                "HTML and CSS", "JavaScript",
-                "Web Frameworks", "Databases"
-            ],
-        },
-        "Java Developer": {
-            "interests": [
-                "java", "programming", "software development",
-                "applications", "object oriented programming"
-            ],
-            "skills": [
-                "java", "object-oriented programming",
-                "data structures", "sql", "git and github"
-            ],
-            "description": (
-                "Build software applications using Java and OOP principles."
-            ),
-            "learning_focus": [
-                "Java", "Object-Oriented Programming",
-                "Data Structures", "Databases"
-            ],
-        },
-        "Cybersecurity Analyst": {
-            "interests": [
-                "cybersecurity", "security", "networks",
-                "privacy", "ethical hacking", "risk"
-            ],
-            "skills": [
-                "networking", "linux", "python",
-                "security fundamentals", "risk assessment"
-            ],
-            "description": (
-                "Help protect systems and data by identifying security risks."
-            ),
-            "learning_focus": [
-                "Networking", "Linux",
-                "Security Fundamentals", "Risk Management"
-            ],
-        },
-        "Machine Learning Engineer": {
-            "interests": [
-                "machine learning", "artificial intelligence",
-                "data", "mathematics", "model training", "research"
-            ],
-            "skills": [
-                "python", "statistics", "linear algebra",
-                "machine learning", "data processing", "model evaluation"
-            ],
-            "description": (
-                "Develop and evaluate machine learning models."
-            ),
-            "learning_focus": [
-                "Python", "Statistics", "Machine Learning",
-                "Model Evaluation"
-            ],
-        },
-        "Full Stack Developer": {
-            "interests": [
-                "web development", "websites", "frontend",
-                "backend", "software development"
-            ],
-            "skills": [
-                "html", "css", "javascript",
-                "python", "sql", "rest apis"
-            ],
-            "description": (
-                "Build both frontend interfaces and backend systems."
-            ),
-            "learning_focus": [
-                "HTML and CSS", "JavaScript",
-                "Backend Development", "Databases"
-            ],
-        },
-    }
+    interest_text = " ".join(interest_items)
+    results = []
 
-    # Convert inputs into lists of strings.
-    def normalize_input(value):
-        if isinstance(value, str):
-            return [
-                item.strip()
-                for item in value.split(",")
-                if item.strip()
-            ]
+    for career, details in CAREERS.items():
+        keywords = [word.lower() for word in details["keywords"]]
+        required = details["skills"]
 
-        if isinstance(value, (list, tuple, set)):
-            return [
-                item.strip()
-                for item in value
-                if isinstance(item, str) and item.strip()
-            ]
-
-        return []
-
-    user_interests = [
-        item.casefold() for item in normalize_input(interests)
-    ]
-    user_skills = [
-        item.casefold() for item in normalize_input(skills)
-    ]
-    user_goals = [
-        item.casefold() for item in normalize_input(career_goal)
-    ]
-
-    recommendations = []
-
-    for career, profile in career_profiles.items():
-        interest_matches = sum(
-            1
-            for interest in user_interests
+        matched_skills = [
+            skill for skill in required
             if any(
-                interest in category or category in interest
-                for category in profile["interests"]
+                user_skill == skill.lower()
+                or user_skill in skill.lower()
+                or skill.lower() in user_skill
+                for user_skill in skill_items
+            )
+        ]
+
+        matched_interests = [
+            keyword for keyword in keywords
+            if keyword in interest_text
+        ]
+
+        goal_match = bool(
+            goal and (
+                goal == career.lower()
+                or career.lower() in goal
+                or goal in career.lower()
             )
         )
 
-        skill_matches = sum(
-            1
-            for skill in user_skills
-            if skill in profile["skills"]
+        # Skills carry the most weight; interests and goals also contribute.
+        score = round(
+            (len(matched_skills) / max(len(required), 1)) * 60
+            + min(len(matched_interests), 3) * 10
+            + (20 if goal_match else 0)
         )
+        score = min(score, 100)
 
-        goal_matches = sum(
-            1
-            for goal in user_goals
-            if any(
-                goal in category or category in goal
-                for category in profile["interests"]
+        # Do not show unrelated careers just to fill the list.
+        if score == 0:
+            continue
+
+        reasons = []
+        if goal_match:
+            reasons.append("It matches your stated career goal.")
+        if matched_interests:
+            reasons.append(
+                "Related interests: " + ", ".join(matched_interests[:3]) + "."
             )
-        )
+        if matched_skills:
+            reasons.append(
+                "You already have relevant skills: "
+                + ", ".join(matched_skills) + "."
+            )
 
-        score = (
-            interest_matches * 3
-            + skill_matches * 2
-            + goal_matches * 4
-        )
+        missing_skills = [
+            skill for skill in required
+            if skill not in matched_skills
+        ]
 
-        recommendations.append({
+        results.append({
             "career": career,
+            "title": career,
+            "description": details["description"],
             "score": score,
-            "description": profile["description"],
-            "matched_skills": [
-                skill
-                for skill in normalize_input(skills)
-                if skill.casefold() in profile["skills"]
-            ],
-            "learning_focus": profile["learning_focus"],
+            "reason": " ".join(reasons) or (
+                "This career may be worth exploring based on your profile."
+            ),
+            "skills": required,
+            "matched_skills": matched_skills,
+            "missing_skills": missing_skills,
+            "next_step": details["next_step"],
         })
 
-    recommendations.sort(
-        key=lambda item: item["score"],
-        reverse=True,
-    )
-
-    return recommendations[:5]
+    results.sort(key=lambda item: item["score"], reverse=True)
+    return results[:4]
