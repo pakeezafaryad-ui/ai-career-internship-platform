@@ -1,4 +1,6 @@
 import streamlit as st
+import json
+from pathlib import Path
 
 from services.database import init_db
 from services.auth_service import register_user, authenticate_user
@@ -15,18 +17,52 @@ from services.application_tracker import (
     get_user_applications,
 )
 
-
 # --------------------------------------------------
 # PAGE CONFIGURATION
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="AI Career & Internship Platform",
+    page_title="CareerPath AI",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+# --------------------------------------------------
+# INTERFACE DESIGN
+# --------------------------------------------------
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #f6f8fc;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #172554;
+    }
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    .hero {
+        padding: 28px;
+        border-radius: 18px;
+        background: linear-gradient(120deg, #172554, #4f46e5);
+        color: white;
+        margin-bottom: 20px;
+    }
+    .hero h1, .hero p {
+        color: white;
+    }
+    div.stButton > button[kind="primary"] {
+        background: #4f46e5;
+        border-radius: 10px;
+        border: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------
 # DATABASE INITIALIZATION
@@ -35,9 +71,46 @@ st.set_page_config(
 try:
     init_db()
 except Exception as error:
-    st.error("Could not initialize the database.")
+    st.error("The database could not be initialized.")
     st.code(str(error))
     st.stop()
+
+
+# --------------------------------------------------
+# HELPER FUNCTIONS
+# --------------------------------------------------
+
+def split_items(text):
+    """Convert comma-separated skills or interests into a list."""
+    return [
+        item.strip()
+        for item in text.replace("\n", ",").split(",")
+        if item.strip()
+    ]
+
+
+def show_result(value):
+    """Display results whether they are dictionaries, lists, or text."""
+    if isinstance(value, (dict, list)):
+        st.json(value)
+    else:
+        st.write(value)
+
+
+def get_field(item, key, default=""):
+    if isinstance(item, dict):
+        return item.get(key, default)
+    return getattr(item, key, default)
+
+
+def show_error(message, error):
+    st.error(message)
+    with st.expander("Technical details"):
+        st.code(str(error))
+
+
+def require_login():
+    return st.session_state.get("user") is not None
 
 
 # --------------------------------------------------
@@ -52,129 +125,64 @@ if "page" not in st.session_state:
 
 
 # --------------------------------------------------
-# HELPER FUNCTIONS
-# --------------------------------------------------
-
-def split_items(text):
-    """Convert comma-separated text into a list."""
-    return [
-        item.strip()
-        for item in text.replace("\n", ",").split(",")
-        if item.strip()
-    ]
-
-
-def display_result(result):
-    """Display a result whether it is a dictionary, list, or text."""
-    if isinstance(result, dict):
-        for key, value in result.items():
-            st.markdown(f"**{str(key).replace('_', ' ').title()}**")
-            if isinstance(value, (dict, list)):
-                st.json(value)
-            else:
-                st.write(value)
-
-    elif isinstance(result, list):
-        if not result:
-            st.info("No results found.")
-        else:
-            for index, item in enumerate(result, start=1):
-                with st.container(border=True):
-                    st.markdown(f"**Result {index}**")
-                    if isinstance(item, dict):
-                        for key, value in item.items():
-                            st.write(
-                                f"{str(key).replace('_', ' ').title()}: "
-                                f"{value}"
-                            )
-                    else:
-                        st.write(item)
-    else:
-        st.write(result)
-
-
-def safe_text(value, default="Not available"):
-    """Return readable text for missing or empty values."""
-    if value is None or value == "":
-        return default
-    return str(value)
-
-
-# --------------------------------------------------
-# HEADER
-# --------------------------------------------------
-
-st.title("🎓 AI Career & Internship Platform")
-st.caption(
-    "Explore career paths, identify skill gaps, build learning roadmaps, "
-    "find sample internships, and track your applications."
-)
-
-st.divider()
-
-
-# --------------------------------------------------
 # LOGIN AND REGISTRATION
 # --------------------------------------------------
 
-if st.session_state.user is None:
+if not require_login():
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>🎓 CareerPath AI</h1>
+            <p>Your simple guide to careers, skills, learning and internships.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     login_tab, register_tab = st.tabs(
-        ["🔐 Login", "📝 Create Account"]
+        ["🔐 Login", "✨ Create Account"]
     )
 
     with login_tab:
         st.subheader("Welcome back")
+        st.write("Log in to continue your career journey.")
 
         with st.form("login_form"):
-            login_email = st.text_input(
-                "Email",
-                placeholder="you@example.com",
-            )
+            login_email = st.text_input("Email address")
             login_password = st.text_input(
-                "Password",
-                type="password",
+                "Password", type="password"
             )
             login_submit = st.form_submit_button(
-                "Login",
-                type="primary",
-                use_container_width=True,
+                "Login", type="primary", use_container_width=True
             )
 
         if login_submit:
-            email = login_email.strip().lower()
-
-            if not email or not login_password:
+            if not login_email.strip() or not login_password:
                 st.warning("Please enter your email and password.")
             else:
                 try:
-                    user = authenticate_user(email, login_password)
-
+                    user = authenticate_user(
+                        login_email.strip().lower(),
+                        login_password,
+                    )
                     if user:
                         st.session_state.user = user
-                        st.session_state.page = "Dashboard"
-                        st.success("Login successful!")
                         st.rerun()
                     else:
-                        st.error("Invalid email or password.")
-
+                        st.error("Login failed. Check your details.")
                 except Exception as error:
-                    st.error("Login failed. Please try again.")
-                    st.caption(str(error))
+                    show_error("Could not log you in.", error)
 
     with register_tab:
         st.subheader("Create your account")
+        st.write("Create an account to save your learning progress.")
 
         with st.form("register_form"):
-            register_email = st.text_input(
-                "Email address",
-                placeholder="you@example.com",
-                key="register_email",
-            )
-            register_password = st.text_input(
+            new_email = st.text_input("Email address", key="reg_email")
+            new_password = st.text_input(
                 "Create password",
                 type="password",
-                key="register_password",
+                key="reg_password",
             )
             confirm_password = st.text_input(
                 "Confirm password",
@@ -187,42 +195,27 @@ if st.session_state.user is None:
             )
 
         if register_submit:
-            email = register_email.strip().lower()
-
-            if not email or "@" not in email:
-                st.warning("Please enter a valid email address.")
-
-            elif len(register_password) < 8:
-                st.warning(
-                    "Use a password with at least 8 characters."
-                )
-
-            elif register_password != confirm_password:
+            if not new_email.strip() or not new_password:
+                st.warning("Please complete all fields.")
+            elif new_password != confirm_password:
                 st.error("The passwords do not match.")
-
+            elif len(new_password) < 8:
+                st.warning("Use a password with at least 8 characters.")
             else:
                 try:
-                    success, message = register_user(
-                        email,
-                        register_password,
+                    result = register_user(
+                        new_email.strip().lower(),
+                        new_password,
                     )
-
+                    success, message = result
                     if success:
                         st.success(
-                            "Account created successfully. "
-                            "Please log in using the Login tab."
+                            "Account created! Open the Login tab to sign in."
                         )
                     else:
-                        st.error(str(message))
-
+                        st.error(message)
                 except Exception as error:
-                    st.error("Registration failed.")
-                    st.caption(str(error))
-
-    st.info(
-        "Create an account or log in to access your personal dashboard. "
-        "Use a test email and password while testing the project."
-    )
+                    show_error("Could not create the account.", error)
 
     st.stop()
 
@@ -232,48 +225,35 @@ if st.session_state.user is None:
 # --------------------------------------------------
 
 user = st.session_state.user
-user_id = user["id"]
-user_email = user.get("email", "User")
+user_id = get_field(user, "id")
+user_email = get_field(user, "email", "User")
 
+st.sidebar.title("🎓 CareerPath AI")
+st.sidebar.caption("Your personal career assistant")
+st.sidebar.divider()
+st.sidebar.write(f"👤 {user_email}")
 
-# --------------------------------------------------
-# SIDEBAR NAVIGATION
-# --------------------------------------------------
+pages = [
+    "Dashboard",
+    "Career Advisor",
+    "Skill Gap Analyzer",
+    "Learning Roadmap",
+    "Job & Internship Matcher",
+    "Application Tracker",
+]
 
-with st.sidebar:
-    st.title("🧭 Navigation")
-    st.write(f"Logged in as **{user_email}**")
-    st.divider()
+selected_page = st.sidebar.radio(
+    "Navigate",
+    pages,
+    index=pages.index(st.session_state.page)
+    if st.session_state.page in pages else 0,
+)
 
-    pages = [
-        "Dashboard",
-        "Career Advisor",
-        "Skill Gap Analyzer",
-        "Learning Roadmap",
-        "Job & Internship Matcher",
-        "Application Tracker",
-    ]
+st.session_state.page = selected_page
 
-    selected_page = st.radio(
-        "Choose a section",
-        pages,
-        index=(
-            pages.index(st.session_state.page)
-            if st.session_state.page in pages
-            else 0
-        ),
-    )
-
-    st.session_state.page = selected_page
-
-    st.divider()
-
-    if st.button("🚪 Logout", use_container_width=True):
-        st.session_state.user = None
-        st.session_state.page = "Dashboard"
-        st.rerun()
-
-    st.caption("AI Career & Internship Platform")
+if st.sidebar.button("Log out", use_container_width=True):
+    st.session_state.user = None
+    st.rerun()
 
 
 # --------------------------------------------------
@@ -281,70 +261,44 @@ with st.sidebar:
 # --------------------------------------------------
 
 if selected_page == "Dashboard":
-
-    st.header("Your Career Dashboard")
-    st.write(
-        "Use the tools below to explore careers, develop skills, "
-        "plan your learning, and organize internship applications."
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>Welcome to CareerPath AI! 👋</h1>
+            <p>
+                Discover careers, identify missing skills, build a learning
+                plan, and organize your internship applications.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    col1, col2 = st.columns(2)
+    st.subheader("Your career toolkit")
 
-    with col1:
-        with st.container(border=True):
-            st.subheader("🧭 Career Advisor")
-            st.write(
-                "Get career suggestions based on your interests "
-                "and current skills."
-            )
-            if st.button("Explore Careers", use_container_width=True):
-                st.session_state.page = "Career Advisor"
-                st.rerun()
+    cards = [
+        ("🧭 Career Advisor", "Explore careers that fit your interests."),
+        ("🎯 Skill Gap Analyzer", "Find skills you need to develop."),
+        ("📚 Learning Roadmap", "Create a step-by-step study plan."),
+        ("💼 Job Matcher", "Compare your skills with sample opportunities."),
+        ("📋 Application Tracker", "Keep track of your applications."),
+    ]
 
-        with st.container(border=True):
-            st.subheader("📚 Learning Roadmap")
-            st.write(
-                "Create a step-by-step plan for your target career."
-            )
-            if st.button("Build Roadmap", use_container_width=True):
-                st.session_state.page = "Learning Roadmap"
-                st.rerun()
+    columns = st.columns(3)
+    for index, (title, description) in enumerate(cards):
+        with columns[index % 3]:
+            with st.container(border=True):
+                st.subheader(title)
+                st.write(description)
 
-        with st.container(border=True):
-            st.subheader("📋 Application Tracker")
-            st.write(
-                "Record and review the internships you have applied for."
-            )
-            if st.button("Track Applications", use_container_width=True):
-                st.session_state.page = "Application Tracker"
-                st.rerun()
+    st.info(
+        "Start with Career Advisor, then use Skill Gap Analyzer "
+        "to decide what to learn next."
+    )
 
-    with col2:
-        with st.container(border=True):
-            st.subheader("🎯 Skill Gap Analyzer")
-            st.write(
-                "Compare your current skills with the skills "
-                "required for a career."
-            )
-            if st.button("Analyze Skills", use_container_width=True):
-                st.session_state.page = "Skill Gap Analyzer"
-                st.rerun()
-
-        with st.container(border=True):
-            st.subheader("💼 Job & Internship Matcher")
-            st.write(
-                "Explore sample opportunities and compare their "
-                "requirements with your skills."
-            )
-            if st.button("Find Opportunities", use_container_width=True):
-                st.session_state.page = "Job & Internship Matcher"
-                st.rerun()
-
-    st.divider()
-    st.subheader("Project Information")
-    st.write(
-        "This version uses rule-based career recommendations and "
-        "sample job listings. It does not fetch live vacancies."
+    st.caption(
+        "Note: Sample job listings are demonstration data, not verified "
+        "live vacancies."
     )
 
 
@@ -353,10 +307,10 @@ if selected_page == "Dashboard":
 # --------------------------------------------------
 
 elif selected_page == "Career Advisor":
-
-    st.header("🧭 AI Career Advisor")
+    st.title("🧭 Career Advisor")
     st.write(
-        "Enter your interests and skills to receive career suggestions."
+        "Tell us what you enjoy and what you know. "
+        "We'll suggest career paths to explore."
     )
 
     with st.form("career_form"):
@@ -364,44 +318,35 @@ elif selected_page == "Career Advisor":
             "Your interests",
             placeholder="Artificial Intelligence, programming, automation",
         )
-
-        career_skills_text = st.text_area(
+        skills_text = st.text_area(
             "Your current skills",
             placeholder="Python, Java, Git and GitHub",
         )
-
         career_goal = st.text_input(
-            "Target career (optional)",
+            "Your career goal (optional)",
             placeholder="AI Engineer",
         )
-
-        career_submit = st.form_submit_button(
-            "Recommend Careers",
-            type="primary",
+        submit = st.form_submit_button(
+            "Recommend Careers", type="primary"
         )
 
-    if career_submit:
+    if submit:
         interests = split_items(interests_text)
-        skills = split_items(career_skills_text)
+        skills = split_items(skills_text)
 
         if not interests and not skills and not career_goal.strip():
-            st.warning(
-                "Enter at least one interest, skill, or career goal."
-            )
+            st.warning("Enter at least an interest, a skill, or a career goal.")
         else:
             try:
-                recommendations = recommend_careers(
+                results = recommend_careers(
                     interests,
                     skills,
                     career_goal.strip(),
                 )
-
-                st.subheader("Your Career Recommendations")
-                display_result(recommendations)
-
+                st.subheader("Your career suggestions")
+                show_result(results)
             except Exception as error:
-                st.error("Could not generate career recommendations.")
-                st.code(str(error))
+                show_error("Could not generate career suggestions.", error)
 
 
 # --------------------------------------------------
@@ -409,47 +354,40 @@ elif selected_page == "Career Advisor":
 # --------------------------------------------------
 
 elif selected_page == "Skill Gap Analyzer":
-
-    st.header("🎯 Skill Gap Analyzer")
+    st.title("🎯 Skill Gap Analyzer")
     st.write(
-        "Compare your current skills with a target career's "
-        "expected skills."
+        "Compare your current skills with the skills commonly needed "
+        "for your target career."
     )
 
     with st.form("skill_gap_form"):
-        current_skills_text = st.text_area(
-            "Current skills",
-            placeholder="Python, Pandas, SQL",
+        skills_text = st.text_area(
+            "Skills you already have",
+            placeholder="Python, Java, SQL",
         )
-
         target_career = st.text_input(
             "Target career",
             placeholder="AI Engineer",
         )
-
-        skill_gap_submit = st.form_submit_button(
-            "Analyze Skill Gap",
-            type="primary",
+        submit = st.form_submit_button(
+            "Analyze My Skills", type="primary"
         )
 
-    if skill_gap_submit:
-        current_skills = split_items(current_skills_text)
+    if submit:
+        skills = split_items(skills_text)
 
         if not target_career.strip():
-            st.warning("Please enter your target career.")
+            st.warning("Please enter a target career.")
         else:
             try:
                 result = analyze_skill_gap(
-                    current_skills,
+                    skills,
                     target_career.strip(),
                 )
-
-                st.subheader("Skill Gap Results")
-                display_result(result)
-
+                st.subheader("Your skill analysis")
+                show_result(result)
             except Exception as error:
-                st.error("Could not analyze the skill gap.")
-                st.code(str(error))
+                show_error("Could not analyze your skills.", error)
 
 
 # --------------------------------------------------
@@ -457,169 +395,74 @@ elif selected_page == "Skill Gap Analyzer":
 # --------------------------------------------------
 
 elif selected_page == "Learning Roadmap":
-
-    st.header("📚 Learning Roadmap Generator")
+    st.title("📚 Learning Roadmap")
     st.write(
-        "Create a learning plan based on your target career, "
-        "existing skills, and available time."
+        "Create a learning plan that breaks your career goal into "
+        "smaller, manageable steps."
     )
 
     with st.form("roadmap_form"):
         roadmap_career = st.text_input(
-            "Target career",
+            "Career you want to prepare for",
             placeholder="Python Developer",
         )
-
         roadmap_skills_text = st.text_area(
-            "Current skills",
-            placeholder="Python, Java, Git and GitHub",
+            "Skills you already know",
+            placeholder="Python, Java",
         )
-
-        weeks = st.selectbox(
-            "Roadmap duration",
-            [4, 6, 8, 10, 12, 16, 24],
-            index=2,
-            format_func=lambda value: f"{value} weeks",
+        weeks = st.select_slider(
+            "How many weeks do you want to plan for?",
+            options=[2, 4, 6, 8, 12, 16, 24],
+            value=8,
         )
-
         roadmap_submit = st.form_submit_button(
-            "Generate Roadmap",
-            type="primary",
+            "Generate Roadmap", type="primary"
         )
 
     if roadmap_submit:
         if not roadmap_career.strip():
-            st.warning("Please enter a target career.")
+            st.warning("Please enter your target career.")
         else:
             try:
                 current_skills = split_items(roadmap_skills_text)
-
                 roadmap = generate_learning_roadmap(
                     roadmap_career.strip(),
                     current_skills,
                     weeks,
                 )
 
-                st.subheader("Your Learning Roadmap")
+                st.subheader("Your learning plan")
+                show_result(roadmap)
 
-                if isinstance(roadmap, dict):
-                    title = roadmap.get("title", roadmap_career)
-                    st.markdown(f"### {title}")
-
-                    plan = roadmap.get(
-                        "plan",
-                        roadmap.get(
-                            "weeks",
-                            roadmap.get("roadmap", []),
-                        ),
-                    )
-
-                    if isinstance(plan, list):
-                        for index, step in enumerate(plan, start=1):
-                            with st.container(border=True):
-                                if isinstance(step, dict):
-                                    heading = (
-                                        step.get("week")
-                                        or step.get("title")
-                                        or step.get("topic")
-                                        or f"Step {index}"
-                                    )
-                                    st.markdown(f"**{heading}**")
-
-                                    details = (
-                                        step.get("tasks")
-                                        or step.get("activities")
-                                        or step.get("description")
-                                        or step.get("content")
-                                    )
-
-                                    if isinstance(details, list):
-                                        for detail in details:
-                                            st.write(f"- {detail}")
-                                    elif details:
-                                        st.write(details)
-                                    else:
-                                        st.json(step)
-                                else:
-                                    st.markdown(
-                                        f"**Step {index}:** {step}"
-                                    )
-
-                    elif isinstance(plan, str):
-                        st.write(plan)
+                if st.button("Save This Roadmap", type="primary"):
+                    saved = save_roadmap(user_id, roadmap)
+                    if saved:
+                        st.success("Your roadmap was saved.")
                     else:
-                        display_result(plan)
-
-                elif isinstance(roadmap, list):
-                    for index, step in enumerate(roadmap, start=1):
-                        st.markdown(f"**Step {index}**")
-                        display_result(step)
-
-                else:
-                    st.write(roadmap)
-
-                if st.button(
-                    "💾 Save This Roadmap",
-                    type="primary",
-                    key="save_roadmap_button",
-                ):
-                    try:
-                        saved = save_roadmap(user_id, roadmap)
-
-                        if saved:
-                            st.success(
-                                "Roadmap saved to your account."
-                            )
-                        else:
-                            st.warning(
-                                "The save function did not confirm "
-                                "success. Check services/learning_roadmap.py."
-                            )
-                    except Exception as error:
-                        st.error("Could not save the roadmap.")
-                        st.code(str(error))
-
+                        st.warning(
+                            "The save function did not confirm success. "
+                            "Check services/learning_roadmap.py."
+                        )
             except Exception as error:
-                st.error("Could not generate the learning roadmap.")
-                st.code(str(error))
+                show_error("Could not create the learning roadmap.", error)
 
     st.divider()
-    st.subheader("Previously Saved Roadmaps")
+    st.subheader("Previously saved roadmaps")
 
     try:
         saved_roadmaps = get_user_roadmaps(user_id) or []
-
         if not saved_roadmaps:
             st.info("Your saved roadmaps will appear here.")
         else:
-            for item in saved_roadmaps:
-                with st.container(border=True):
-                    if isinstance(item, dict):
-                        title = item.get("title", "Learning Roadmap")
-                        st.markdown(f"**{title}**")
-
-                        plan = item.get("plan")
-                        if plan is not None:
-                            display_result(plan)
-
-                        progress = item.get("progress_percent", 0)
-                        try:
-                            progress = max(
-                                0,
-                                min(100, int(float(progress))),
-                            )
-                            st.progress(
-                                progress,
-                                text=f"Progress: {progress}%",
-                            )
-                        except (TypeError, ValueError):
-                            pass
-                    else:
-                        display_result(item)
-
+            for index, item in enumerate(saved_roadmaps):
+                with st.expander(
+                    str(get_field(item, "title", "Learning roadmap"))
+                ):
+                    show_result(
+                        get_field(item, "plan", item)
+                    )
     except Exception as error:
-        st.warning("Could not load saved roadmaps.")
-        st.caption(str(error))
+        show_error("Could not load saved roadmaps.", error)
 
 
 # --------------------------------------------------
@@ -627,14 +470,172 @@ elif selected_page == "Learning Roadmap":
 # --------------------------------------------------
 
 elif selected_page == "Job & Internship Matcher":
-
-    st.header("💼 Job & Internship Matcher")
+    st.title("💼 Job & Internship Matcher")
     st.write(
-        "Enter your skills to compare them with the project's "
-        "sample opportunities."
+        "Enter your skills to compare them with the project's sample "
+        "opportunities. These are not live job listings."
     )
 
     with st.form("job_match_form"):
         job_skills_text = st.text_area(
             "Your skills",
-            placeholder="Python, SQL, Git and
+            placeholder="Python, SQL, Git and GitHub, REST APIs",
+        )
+        target_role = st.text_input(
+            "Preferred role (optional)",
+            placeholder="Python Developer Intern",
+        )
+        job_submit = st.form_submit_button(
+            "Find Matches", type="primary"
+        )
+
+    if job_submit:
+        skills = split_items(job_skills_text)
+
+        if not skills:
+            st.warning("Enter at least one skill.")
+        else:
+            try:
+                jobs = match_jobs(
+                    skills,
+                    target_role.strip() or None,
+                )
+
+                if not jobs:
+                    st.info(
+                        "No matching sample opportunities were found. "
+                        "Try different skills or a different role."
+                    )
+
+                for job in jobs:
+                    with st.container(border=True):
+                        st.subheader(
+                            str(get_field(job, "title", "Opportunity"))
+                        )
+                        st.write(
+                            f"**Company:** "
+                            f"{get_field(job, 'company', 'Not specified')}"
+                        )
+                        st.write(
+                            get_field(job, "description", "")
+                        )
+
+                        match_percent = get_field(
+                            job, "match_percent", None
+                        )
+                        if match_percent is not None:
+                            try:
+                                percentage = float(match_percent)
+                                st.metric(
+                                    "Skill match",
+                                    f"{percentage:.0f}%"
+                                )
+                                st.progress(
+                                    max(0.0, min(1.0, percentage / 100))
+                                )
+                            except (TypeError, ValueError):
+                                st.write(f"Skill match: {match_percent}")
+
+                        matched = get_field(job, "matched_skills", [])
+                        missing = get_field(job, "missing_skills", [])
+
+                        st.write("**Matching skills:**")
+                        st.write(
+                            ", ".join(matched)
+                            if matched else "No matching skills listed."
+                        )
+
+                        st.write("**Skills to learn:**")
+                        st.write(
+                            ", ".join(missing)
+                            if missing else "No missing skills listed."
+                        )
+
+                        st.caption(
+                            "Demonstration opportunity. Verify a vacancy "
+                            "with an employer before applying."
+                        )
+            except Exception as error:
+                show_error("Could not match opportunities.", error)
+
+
+# --------------------------------------------------
+# APPLICATION TRACKER
+# --------------------------------------------------
+
+elif selected_page == "Application Tracker":
+    st.title("📋 Application Tracker")
+    st.write(
+        "Record your applications and review their status in one place."
+    )
+
+    with st.form("application_form"):
+        company = st.text_input(
+            "Company name",
+            placeholder="DemoTech Solutions",
+        )
+        role = st.text_input(
+            "Role",
+            placeholder="Python Developer Intern",
+        )
+        status = st.selectbox(
+            "Application status",
+            ["Applied", "Under Review", "Interview", "Accepted", "Rejected"],
+        )
+        application_submit = st.form_submit_button(
+            "Add Application", type="primary"
+        )
+
+    if application_submit:
+        if not company.strip() or not role.strip():
+            st.warning("Please enter both the company and role.")
+        else:
+            try:
+                result = add_application(
+                    user_id,
+                    company.strip(),
+                    role.strip(),
+                    status,
+                )
+                success, message = result
+
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
+            except Exception as error:
+                show_error("Could not add the application.", error)
+
+    st.divider()
+    st.subheader("Your applications")
+
+    try:
+        applications = get_user_applications(user_id) or []
+
+        if not applications:
+            st.info("You haven't recorded any applications yet.")
+        else:
+            for application in applications:
+                with st.container(border=True):
+                    st.subheader(
+                        str(get_field(application, "role", "Application"))
+                    )
+                    st.write(
+                        f"**Company:** "
+                        f"{get_field(application, 'company', 'Not specified')}"
+                    )
+                    st.write(
+                        f"**Status:** "
+                        f"{get_field(application, 'status', 'Applied')}"
+                    )
+    except Exception as error:
+        show_error("Could not load your applications.", error)
+
+
+# --------------------------------------------------
+# FOOTER
+# --------------------------------------------------
+
+st.sidebar.divider()
+st.sidebar.caption("CareerPath AI • Student Project")
+st.sidebar.caption("Plan y
