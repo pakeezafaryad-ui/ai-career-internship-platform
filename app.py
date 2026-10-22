@@ -645,7 +645,7 @@ elif page == "Learning Roadmap":
 
     st.markdown("### Previously saved roadmaps")
 
-    try:
+try:
         saved_roadmaps = get_user_roadmaps(user_id) or []
 
         if not saved_roadmaps:
@@ -653,13 +653,41 @@ elif page == "Learning Roadmap":
         else:
             for item in saved_roadmaps:
                 with st.container(border=True):
-                    st.markdown(
-                        f"**{get_value(item, 'title', default='Learning roadmap')}**"
+                    title = get_value(
+                        item,
+                        "title",
+                        default="Learning roadmap"
                     )
-                    st.write(
-                        get_value(
-                            item, "plan",
-                            default="Open your roadmap to view the plan.",
-                        )
+                    st.markdown(f"### {title}")
+
+                    plan = get_value(
+                        item,
+                        "plan",
+                        default="Open your roadmap to view the plan."
                     )
-                    progress = item.get("progress_percent", 0)
+
+                    if isinstance(plan, list):
+                        for index, step in enumerate(plan, start=1):
+                            st.markdown(f"**Step {index}**")
+                            st.write(step)
+                    else:
+                        st.write(plan)
+
+                    progress = get_value(
+                        item,
+                        "progress_percent",
+                        default=0
+                    )
+
+                    try:
+                        progress = float(progress)
+                    except (TypeError, ValueError):
+                        progress = 0
+
+                    progress = max(0, min(100, progress))
+                    st.progress(int(progress))
+                    st.caption(f"Progress: {int(progress)}%")
+
+    except Exception as error:
+        st.error("Could not load your saved roadmaps.")
+        st.caption(str(error))
