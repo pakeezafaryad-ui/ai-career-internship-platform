@@ -1,82 +1,121 @@
+
 # AI Career and Internship Agent Platform
 
-A university Software Engineering project starter for a secure career guidance and internship matching application.
+An educational career guidance platform built with Python and Streamlit. It helps students explore career paths, identify skill gaps, create learning roadmaps, discover sample opportunities, and track internship applications.
 
-## Current status
+## Features
 
-This repository currently contains the first runnable Streamlit interface and a Google Colab setup notebook. AI agents, authentication, database persistence, RAG, and notifications are not implemented yet.
+- **Career Advisor:** Recommends career paths based on interests and skills.
+- **Skill Gap Analyzer:** Compares existing skills with career requirements.
+- **Learning Roadmaps:** Creates structured learning plans for selected careers.
+- **Opportunity Matcher:** Matches skills against a sample job and internship dataset.
+- **Application Tracker:** Records applications and tracks their status.
+- **User Accounts:** Supports registration and login with hashed passwords.
+- **Privacy and Safety:** Separates user records by account and avoids storing plain-text passwords.
 
-**Demo mode:** The current page displays general learning suggestions only. It does not show real vacancies or guarantee career outcomes.
+## Technology Stack
 
-## Tech stack roadmap
+- Python
+- Streamlit
+- SQLAlchemy
+- SQLite
+- Argon2 password hashing
+- JSON sample dataset
+- GitHub
+- Streamlit Community Cloud
 
-- Python and Streamlit
-- SQLite (with SQLAlchemy when database features are added)
-- CrewAI and Groq for multi-agent workflows
-- Hugging Face embeddings and ChromaDB for RAG
-- n8n for optional reminders and notifications
-- Git and GitHub for version control
+## Project Structure
 
-## Run in Google Colab
+```text
+ai-career-internship-platform/
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── data/
+│   └── sample_jobs.json
+└── services/
+    ├── __init__.py
+    ├── database.py
+    ├── auth_service.py
+    ├── career_advisor.py
+    ├── skill_gap.py
+    ├── learning_roadmap.py
+    ├── job_matcher.py
+    └── application_tracker.py
+```
 
-1. Upload `AI_Career_Internship_Starter.ipynb` to Google Colab.
-2. Run the cells from top to bottom.
-3. The notebook installs Streamlit and checks the starter source files.
-4. For interactive web preview in Colab, the notebook uses a temporary tunnel only if you explicitly run that optional cell. Do not enter passwords or upload sensitive CVs into a public demo.
+## Run Locally
 
-## Run locally
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/pakeezafaryad-ui/ai-career-internship-platform.git
+cd ai-career-internship-platform
+```
+
+### 2. Create a virtual environment
+
+Windows:
 
 ```bash
 python -m venv .venv
+.venv\Scripts\activate
 ```
 
-Windows:
-```bash
-.venv\\Scripts\\activate
-```
+macOS or Linux:
 
-macOS/Linux:
 ```bash
+python -m venv .venv
 source .venv/bin/activate
 ```
 
-Install and run:
+### 3. Install dependencies
+
 ```bash
 pip install -r requirements.txt
+```
+
+### 4. Launch the application
+
+```bash
 streamlit run app.py
 ```
 
-## Upload to GitHub
+The terminal will provide a local URL where you can open the application.
 
-1. Create a new empty GitHub repository.
-2. Upload the project files, or use Git:
-   ```bash
-   git init
-   git add .
-   git commit -m "Add secure career platform starter"
-   git branch -M main
-   git remote add origin YOUR_REPOSITORY_URL
-   git push -u origin main
-   ```
-3. Do not upload `.env`, API keys, private CVs, databases, or user records.
+## Privacy and Security
 
-## Security principles for future steps
+- Passwords are hashed instead of stored as plain text.
+- Database queries should restrict records to the authenticated user.
+- Secrets and environment files should not be committed to GitHub.
+- Use fictional data when demonstrating the project.
+- Do not enter sensitive personal information into a demonstration deployment.
+- Sample opportunities are fictional and must not be treated as verified vacancies.
 
-- Keep secrets out of source control; use Colab Secrets or Streamlit secrets.
-- Enforce authentication and per-user authorization before storing private information.
-- Treat uploaded documents and retrieved text as untrusted input.
-- Validate AI outputs and require user approval before external actions.
-- Use fictional sample listings only when clearly labeled as demo data.
+## Current Limitations
 
-## Planned build sequence
+This is an educational prototype. Career recommendations and skill matching use rule-based logic rather than a trained AI model. Job listings are sample data, not live vacancies. The platform does not guarantee employment, internship placement, or career outcomes.
 
-1. Starter interface and notebook
-2. Configuration, dependencies, and secret handling
-3. Database schema and authentication/authorization
-4. CV parsing and structured validation
-5. RAG ingestion and retrieval
-6. Specialized agents and verification
-7. Explainable job matching and roadmap tracking
-8. Testing, privacy controls, and deletion/export
-9. Optional n8n notifications
-10. Deployment and final report
+Before production use, add appropriate session protection, login rate limiting, email verification, database backup and retention policies, and further security testing.
+
+## Future Improvements
+
+- Integrate verified job and internship sources.
+- Add retrieval-augmented generation (RAG) for career resources.
+- Introduce a multi-agent career guidance workflow.
+- Add email notifications and application reminders.
+- Add administrator tools and stronger access controls.
+- Deploy with persistent database storage and monitoring.
+
+## Author
+
+**Pakeeza Faryad**
+
+Software Engineering Student
+
+GitHub: https://github.com/pakeezafaryad-ui
+
+---
+
+*Created as an educational project to explore career guidance, automation, and secure web application development.*
