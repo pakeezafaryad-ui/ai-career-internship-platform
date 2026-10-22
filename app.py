@@ -637,4 +637,4 @@ elif selected_page == "Job & Internship Matcher":
     with st.form("job_match_form"):
         job_skills_text = st.text_area(
             "Your skills",
-            placeholder="Python, SQL, Git and GitHub"
+            placeholder="Python, SQL, Git and
