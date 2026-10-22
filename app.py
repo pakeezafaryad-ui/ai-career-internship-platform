@@ -638,4 +638,5 @@ elif selected_page == "Application Tracker":
 
 st.sidebar.divider()
 st.sidebar.caption("CareerPath AI • Student Project")
-st.sidebar.caption("Plan y
+st.sidebar.caption("CareerPath AI • Student Project")
+st.sidebar.caption("Plan your learning. Explore your future.")
