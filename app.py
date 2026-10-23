@@ -28,6 +28,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 # --------------------------------------------------
 # INTERFACE DESIGN
 # --------------------------------------------------
@@ -38,12 +39,15 @@ st.markdown(
     .stApp {
         background-color: #f6f8fc;
     }
+
     [data-testid="stSidebar"] {
         background-color: #172554;
     }
+
     [data-testid="stSidebar"] * {
         color: white !important;
     }
+
     .hero {
         padding: 28px;
         border-radius: 18px;
@@ -51,13 +55,32 @@ st.markdown(
         color: white;
         margin-bottom: 20px;
     }
+
     .hero h1, .hero p {
         color: white;
     }
+
     div.stButton > button[kind="primary"] {
-        background: #4f46e5;
-        border-radius: 10px;
-        border: none;
+        background-color: #4f46e5 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+        font-weight: 600 !important;
+    }
+
+    /* Make the sidebar Log out button visible */
+    section[data-testid="stSidebar"] div.stButton > button {
+        background-color: #3B82F6 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #60A5FA !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }
+
+    section[data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
+        border-color: #2563EB !important;
     }
     </style>
     """,
